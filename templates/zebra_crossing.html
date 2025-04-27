@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zebra Crossing Data</title>
+</head>
+<body>
+    <h1>Zebra Crossing Analytics</h1>
+    {% for cam_id in range(1, 5) %}
+        <h2>Camera {{ cam_id }}</h2>
+        <table>
+            <tr>
+                <th>Timestamp</th>
+                <th>Vehicle Type</th>
+                <th>Vehicle Count</th>
+            </tr>
+            {% for entry in data['cam' ~ cam_id] %}
+                <tr>
+                    <td>{{ entry.timestamp }}</td>
+                    <td>{{ entry.vehicle_type }}</td>
+                    <td>{{ entry.vehicle_count }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>

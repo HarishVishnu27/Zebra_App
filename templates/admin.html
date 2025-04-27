@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Zebra Region Editing</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/konva@8.3.5/konva.min.js"></script>
+</head>
+<body>
+    <header class="bg-gray-800 text-white p-4">
+        <h1 class="text-xl">Admin Panel - Edit Zebra Crossing Regions</h1>
+    </header>
+    <main class="p-4">
+        <div class="mb-4">
+            <label for="camera-select" class="block mb-2 font-bold">Select Camera:</label>
+            <select id="camera-select" class="p-2 border rounded">
+                <option value="cam1">Camera 1</option>
+                <option value="cam2">Camera 2</option>
+                <option value="cam3">Camera 3</option>
+                <option value="cam4">Camera 4</option>
+            </select>
+        </div>
+        <div id="canvas-container" class="relative">
+            <canvas id="canvas" width="640" height="480" class="border"></canvas>
+        </div>
+        <button id="save-btn" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Save Region</button>
+    </main>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const stage = new Konva.Stage({
+            container: 'canvas-container',
+            width: 640,
+            height: 480,
+        });
+        const layer = new Konva.Layer();
+        stage.add(layer);
+
+        const cameraSelect = document.getElementById('camera-select');
+        const saveButton = document.getElementById('save-btn');
+        let currentCamera = 'cam1';
+        let zebraRegion = null;
+
+        // Load current region for the selected camera
+        async function loadRegion() {
+            const response = await fetch(`/get_regions`);
+            const data = await response.json();
+            const vertices = data[currentCamera].Zebra.vertices;
+
+            if (zebraRegion) zebraRegion.destroy();
+
+            zebraRegion = new Konva.Line({
+                points: vertices.flat(),
+                stroke: 'blue',
+                strokeWidth: 2,
+                draggable: true,
+                closed: false,
+            });
+            layer.add(zebraRegion);
+            layer.draw();
+        }
+
+        // Save updated region
+        async function saveRegion() {
+            const points = zebraRegion.points();
+            const vertices = [];
+            for (let i = 0; i < points.length; i += 2) {
+                vertices.push([points[i], points[i + 1]]);
+            }
+
+            const response = await fetch('/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cam_id: currentCamera,
+                    region: { vertices, color: 'blue' },
+                }),
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        // Event listeners
+        cameraSelect.addEventListener('change', (e) => {
+            currentCamera = e.target.value;
+            loadRegion();
+        });
+
+        saveButton.addEventListener('click', saveRegion);
+
+        // Initial load
+        loadRegion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Live Camera Feeds</h1>
+    {% for cam_id in range(1, 5) %}
+        <div>
+            <h2>Camera {{ cam_id }}</h2>
+            <img src="path_to_live_feed_cam{{ cam_id }}" alt="Camera {{ cam_id }} Live Feed">
+        </div>
+    {% endfor %}
+</body>
+</html>
